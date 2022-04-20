@@ -1,3 +1,3 @@
 module CLD
-  VERSION = "1.1.0.jora".freeze
+  VERSION = "1.1.1.jora".freeze
 end
