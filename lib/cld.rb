@@ -4,14 +4,19 @@ require "ffi"
 module CLD
   extend FFI::Library
 
-  # Workaround FFI dylib/bundle issue.  See https://github.com/ffi/ffi/issues/42
-  suffix = if FFI::Platform.mac?
-    'bundle'
-  else
-    "so"
+  def self.lib_path
+    spec = Gem.loaded_specs["cld2"]
+    shared_object = "libcld2.#{RbConfig::CONFIG["DLEXT"]}"
+    candidates = [
+      # Built by gem installation process
+      File.join(spec.extension_dir, shared_object),
+      # Built by local development process using `rake compile`
+      File.join(File.expand_path(__dir__), "..", "ext", "cld", shared_object)
+    ]
+    candidates.find { |path| File.exist?(path) }
   end
 
-  ffi_lib File.join(File.expand_path(File.dirname(__FILE__)), '..', 'ext', 'cld', 'libcld2.' + suffix)
+  ffi_lib(lib_path)
 
   def self.detect_language(text, is_plain_text=true)
     result = detect_language_ext(text.to_s, is_plain_text)
